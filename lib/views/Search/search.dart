@@ -9,15 +9,16 @@ class Search extends StatefulWidget {
   _SearchState createState() => _SearchState();
 }
 
-class _SearchState extends State<Search> {
+class _SearchState extends State<Search> with AutomaticKeepAliveClientMixin {
   final Color color = Colors.redAccent;
   bool loading = false;
   String loadText = '没有了';
   List resultList;
-  // bool get wantKeepAlive => true;
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BaseContainer(
         color: color, header: searchInput(), child: searcResultList());
   }

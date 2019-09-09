@@ -9,7 +9,7 @@ class Subscription extends StatefulWidget {
 }
 
 class _SubscriptionState extends State<Subscription>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController _controller;
   List subscriptionList = [];
   List historyList = [];
@@ -23,18 +23,19 @@ class _SubscriptionState extends State<Subscription>
   bool loading = false;
   String loadingText = '暂无订阅';
   int _tabIndex = 0;
+  bool get wantKeepAlive => true;
   @override
   void initState() {
     super.initState();
     _controller = TabController(length: tabs.length, vsync: this);
     _controller.addListener(() {
+      loadingText = '加载中...';
       setState(() {
         if (_tabIndex != _controller.index) {
           _tabIndex = _controller.index;
           if (_tabIndex == 0 && subscriptionList.length == 0) {
             _getData(userId, userName);
           }
-
           if (_tabIndex == 1 && historyList.length == 0) {
             _getData(userId, userName);
           }
@@ -75,6 +76,7 @@ class _SubscriptionState extends State<Subscription>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Container(
       child: Column(
         children: <Widget>[
