@@ -1,61 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:unlimit/components/iconfont.dart';
-
-class TabList {
-  String name;
-  String key;
-  Icon icon;
-  Widget page;
-  TabList(this.name, this.key, this.icon, this.page);
-}
+import 'package:unlimit/views/Subscription/subscription.dart';
+import 'package:unlimit/views/User/user.dart';
+import 'package:unlimit/views/Search/search.dart';
+import 'package:unlimit/public/public.dart' show TabList;
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  // 自定义navigationBar
-  TabController _tabController;
+class _HomeState extends State<Home> {
   List<TabList> tabs = [
-    TabList('订阅', 'sub', Icon(IconFont.wenjian), Container(child: Text('订阅'))),
-    TabList('我的', 'user', Icon(IconFont.wode), Container(child: Text('我的'))),
+    TabList(name: '订阅', key: 'sub', icon: Icon(IconFont.wenjian), page: SafeArea(child: Subscription(),)),
+    TabList(name: '搜索', key: 'search', icon: Icon(IconFont.sousuo), page: Search()),
+    TabList(name: '我的', key: 'user', icon: Icon(IconFont.wode), page: User()),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this);
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _tabController = TabController(length: tabs.length, vsync: this);
+  // }
+  int _navIndex = 0;
+  void handleNavChange(index) {
+    setState(() {
+      _navIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-          child: TabBarView(
-            controller: _tabController,
-            children: tabs
-                .map((item) => Stack(
-                      children: <Widget>[item.page],
-                    ))
-                .toList(),
-          ),
-        ),
+        body: tabs[_navIndex].page,
         bottomNavigationBar: navigationBar());
   }
 
   Widget navigationBar() {
     return SafeArea(
-      child: TabBar(
-          indicatorWeight: 1,
-          indicator: BoxDecoration(),
-          labelColor: Colors.orange,
-          labelPadding: EdgeInsets.only(top: 5, bottom: 5),
-          unselectedLabelColor: Colors.black,
-          unselectedLabelStyle: TextStyle(fontSize: 12, height: 0.2),
-          labelStyle: TextStyle(fontSize: 12),
-          controller: _tabController,
-          tabs: tabs.map((item) => Tab(icon: item.icon)).toList()),
+      child: BottomNavigationBar(
+        currentIndex: _navIndex,
+        onTap: handleNavChange,
+        selectedFontSize: 12.0,
+        unselectedFontSize: 12.0,
+        iconSize: 18.0,
+        selectedItemColor: Colors.redAccent,
+        items: tabs
+            .map((item) => BottomNavigationBarItem(
+                icon: item.icon, title: Text(item.name)))
+            .toList(),
+      ),
     );
   }
 }
