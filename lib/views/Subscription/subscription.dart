@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unlimit/public/public.dart' show TabList;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:unlimit/model/model.dart';
 
 class Subscription extends StatefulWidget {
   @override
@@ -13,10 +15,35 @@ class _SubscriptionState extends State<Subscription>
     TabList(name: '历史', key: 'history', page: Container(child: Text('历史'))),
   ];
   TabController _controller;
+  List subscriptionList;
+  String userName = 'jyh1994@qq.com';
+  String userId = '1';
+  bool isLogin = false;
+  bool loading = false;
   @override
   void initState() {
     super.initState();
     _controller = TabController(length: tabs.length, vsync: this);
+    _getData(userId, userName);
+  }
+
+  Future<void> _getData(id, name) async {
+    setState(() {
+      loading = true;
+    });
+    var res = ResponseData.fromJson(await Model.save({'userId': id, 'username': name}));
+    setState(() {
+      loading = false;
+    });
+    if (res.state != 1) {
+      Fluttertoast.showToast(msg: res.msg, textColor: Colors.red, gravity: ToastGravity.CENTER);
+      return false;
+    }
+    setState(() {
+      subscriptionList = res.data;
+    });
+    print(res.data);
+    return true;
   }
 
   @override
@@ -64,9 +91,6 @@ class _SubscriptionState extends State<Subscription>
 class Books extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-    );
+    return Container();
   }
 }
-

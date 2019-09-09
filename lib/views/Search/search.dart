@@ -12,6 +12,7 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   final Color color = Colors.redAccent;
   bool loading = false;
+  String loadText = '没有了';
   List resultList;
   // bool get wantKeepAlive => true;
 
@@ -26,10 +27,12 @@ class _SearchState extends State<Search> {
     var data = {'start': val};
     setState(() {
       loading = true;
+      loadText = '加载中...';
     });
     ResponseData res = ResponseData.fromJson(await Model.search(data));
     setState(() {
       loading = false;
+      loadText = '没有了';
     });
     if (res.state == 0) return;
     setState(() {
@@ -39,14 +42,21 @@ class _SearchState extends State<Search> {
 
   Widget searcResultList() {
     return Scrollbar(
-        child: this.resultList != null
+        child: resultList != null && !loading
             ? ListView.builder(
                 padding: EdgeInsets.all(5.0),
-                itemCount: this.resultList.length,
+                itemCount: resultList.length,
                 itemBuilder: (context, idx) {
-                  return CartoonCard(this.resultList[idx]);
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 10.0),
+                    child: CartoonCard(
+                        data: resultList[idx],
+                        onTap: () {
+                          print(resultList[idx]['id']);
+                        }),
+                  );
                 })
-            : Text('Nothing',
+            : Text(loadText,
                 style: TextStyle(height: 10, color: Colors.black45)));
   }
 
