@@ -29,7 +29,7 @@ class HttpRequest {
 
   /// default options
   // static const String API_PREFIX = ''; // base 地址
-  static const int CONNECT_TIMEOUT = 100000;
+  static const int CONNECT_TIMEOUT = 600000;
   static const int RECEIVE_TIMEOUT = 30000;
 
   /// http request methods
@@ -68,14 +68,14 @@ class HttpRequest {
         response = await dio.post(url, data: data);
       }
       result = response.data;
-
       /// 打印响应相关信息
       print('状态：' + response.data['state'].toString());
     } on DioError catch (e) {
+      result['state'] = 0;
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
-      Fluttertoast.showToast(msg: '网络异常', textColor: Colors.red);
-      result['state'] = 0;
+      Fluttertoast.showToast(
+          msg: '网络异常', textColor: Colors.red, gravity: ToastGravity.CENTER);
     }
     return result;
   }

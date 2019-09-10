@@ -16,4 +16,5 @@ class Model {
   // static Interface search = Interface(url: '/anima/search'); // 搜索
   static var search = (Map<String, dynamic> data) => HttpRequest.request(Interface(url: '/anima/search'), data);
   static var save = (Map<String, dynamic> data) => HttpRequest.request(Interface(url: '/anima/save'), data);
+  static var detail = (Map<String, dynamic> data) => HttpRequest.request(Interface(url: '/anima/detail'), data);
 }

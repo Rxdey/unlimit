@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:unlimit/public/public.dart' show TabList;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unlimit/model/model.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:unlimit/views/Detail/detail.dart';
 
 class Subscription extends StatefulWidget {
   @override
@@ -56,7 +58,7 @@ class _SubscriptionState extends State<Subscription>
     setState(() {
       loading = false;
     });
-    if (res.state != 1) {
+    if (res.state == 0) {
       Fluttertoast.showToast(
           msg: res.msg, textColor: Colors.red, gravity: ToastGravity.CENTER);
       return false;
@@ -135,7 +137,7 @@ class Books extends StatelessWidget {
         minHeight: double.infinity,
       ),
       child: Container(
-        padding: EdgeInsets.all(15.0),
+        padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 5.0),
         child: subscriptionList.length == 0
             ? Text(
                 loadingText,
@@ -145,9 +147,9 @@ class Books extends StatelessWidget {
             : GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3, // 每行三列
-                  childAspectRatio: 0.56, // 显示区域宽高相等
-                  crossAxisSpacing: 10, // 水平间距
-                  mainAxisSpacing: 10, // 垂直间距
+                  childAspectRatio: 0.65, // 显示区域宽高相等
+                  crossAxisSpacing: 0, // 水平间距
+                  mainAxisSpacing: 0, // 垂直间距
                 ),
                 padding: EdgeInsets.all(5.0),
                 itemCount: subscriptionList.length,
@@ -163,41 +165,56 @@ class Books extends StatelessWidget {
 class SubscriptionCard extends StatelessWidget {
   final Map card;
   SubscriptionCard(this.card);
+  final double width = 105.0;
+  handleTap(context) {
+    Navigator.push(context, CupertinoPageRoute(builder: (context) {
+      return Detail(id: card['id']);
+    }));
+  }
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: FadeInImage.assetNetwork(
-              placeholder: 'lib/assets/image/v.png',
-              image: card['cover'],
-              fit: BoxFit.cover,
-              // width: 150,
-              // height: 180,
+    return GestureDetector(
+      onTap: () {
+        handleTap(context);
+      },
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                width: width,
+                height: 140.0,
+                child: FadeInImage.assetNetwork(
+                  placeholder: 'lib/assets/image/v.png',
+                  image: card['cover'],
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-          Container(
-            alignment: Alignment.topLeft,
-            padding: EdgeInsets.only(bottom: 3.0),
-            child: Text(
-              card['name'],
-              maxLines: 1,
-              style: TextStyle(height: 1.5),
+            Container(
+              alignment: Alignment.topLeft,
+              padding: EdgeInsets.only(bottom: 3.0),
+              width: width,
+              child: Text(
+                card['name'],
+                maxLines: 1,
+                style: TextStyle(height: 1.5),
+              ),
             ),
-          ),
-          Container(
-            alignment: Alignment.topLeft,
-            child: Text(
-              card['last_chapter'] >= 0
-                  ? '看到' + card['last_chapter'].toString() + '话'
-                  : '未看',
-              maxLines: 1,
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            Container(
+              alignment: Alignment.topLeft,
+              width: width,
+              child: Text(
+                card['last_chapter'] >= 0
+                    ? '看到' + card['last_chapter'].toString() + '话'
+                    : '未看',
+                maxLines: 1,
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

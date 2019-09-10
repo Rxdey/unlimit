@@ -5,7 +5,13 @@ class BaseContainer extends StatelessWidget {
   final Widget child;
   final Widget header;
   final Color color;
-  BaseContainer({Key key, this.child, this.color, this.header})
+  final Color background;
+  BaseContainer(
+      {Key key,
+      this.child,
+      this.color,
+      this.header,
+      this.background = Colors.white})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,7 @@ class BaseContainer extends StatelessWidget {
           minHeight: double.infinity,
         ),
         child: Container(
-          color: Colors.white,
+          color: background,
           child: Column(
             children: <Widget>[
               Container(
