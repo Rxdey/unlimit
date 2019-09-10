@@ -65,7 +65,11 @@ class CartoonCard extends StatelessWidget {
                     Text(
                       '最新话' + data['chapter'],
                       maxLines: 1,
-                      style: TextStyle(height: 1.3, color: Colors.black54,fontSize: 12.0,),
+                      style: TextStyle(
+                        height: 1.3,
+                        color: Colors.black54,
+                        fontSize: 12.0,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     // Text(
