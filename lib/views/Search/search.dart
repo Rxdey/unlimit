@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:unlimit/components/baseContainer.dart';
 import 'package:unlimit/components/iconfont.dart';
 import 'package:unlimit/model/model.dart';
 import 'package:unlimit/components/cartoonCard.dart';
+import 'package:unlimit/views/Detail/detail.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -50,11 +52,21 @@ class _SearchState extends State<Search> with AutomaticKeepAliveClientMixin {
                 itemBuilder: (context, idx) {
                   return Padding(
                     padding: EdgeInsets.only(bottom: 10.0),
-                    child: CartoonCard(
-                        data: resultList[idx],
-                        onTap: () {
-                          print(resultList[idx]['id']);
-                        }),
+                    child: Material(
+                      child: Ink(
+                        color: Colors.white,
+                        child: CartoonCard(
+                            data: resultList[idx],
+                            onTap: () {
+                              // print(resultList[idx]['id']);
+                              Navigator.push(context,
+                                  CupertinoPageRoute(builder: (context) {
+                                return Detail(
+                                    id: resultList[idx]['id'].toString());
+                              }));
+                            }),
+                      ),
+                    ),
                   );
                 })
             : Text(loadText,

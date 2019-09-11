@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:unlimit/api/api.dart';
 
-const HOST = 'http://45.76.203.52:9088/mock/21';
+// const HOST = 'http://yapi.rxdey.xyz/mock/21';
+const HOST = 'http://10.255.74.163:9006';
 
 /*
  * 封装 restful 请求
@@ -53,7 +54,6 @@ class HttpRequest {
       }
     });
 
-    /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + baseUrl + url + '】');
     print('请求参数：' + data.toString());
 
@@ -68,14 +68,11 @@ class HttpRequest {
         response = await dio.post(url, data: data);
       }
       result = response.data;
-      /// 打印响应相关信息
       print('状态：' + response.data['state'].toString());
     } on DioError catch (e) {
-      result['state'] = 0;
-      /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
-      Fluttertoast.showToast(
-          msg: '网络异常', textColor: Colors.red, gravity: ToastGravity.CENTER);
+      Fluttertoast.showToast(msg: '网络异常', textColor: Colors.red, gravity: ToastGravity.CENTER);
+      result['state'] = 0;
     }
     return result;
   }

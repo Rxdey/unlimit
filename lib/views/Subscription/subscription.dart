@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unlimit/model/model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:unlimit/views/Detail/detail.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Subscription extends StatefulWidget {
   @override
@@ -26,6 +27,31 @@ class _SubscriptionState extends State<Subscription>
   String loadingText = '暂无订阅';
   int _tabIndex = 0;
   bool get wantKeepAlive => true;
+
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  void _onRefresh() async {
+    // monitor network fetch
+    await _getData(userId, userName, _tabIndex);
+    await Future.delayed(Duration(milliseconds: 1000));
+    // print('_onRefresh');
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
+
+  // void _onLoading() async {
+  //   // monitor network fetch
+  //   // await Future.delayed(Duration(milliseconds: 1000));
+  //   // await _getData(userId, userName, _tabIndex);
+  //   // if failed,use loadFailed(),if no data return,use LoadNodata()
+  //   if (mounted)
+  //     // setState(() {
+
+  //     // });
+  //     _refreshController.loadComplete();
+  // }
+
   @override
   void initState() {
     super.initState();
@@ -36,25 +62,25 @@ class _SubscriptionState extends State<Subscription>
         if (_tabIndex != _controller.index) {
           _tabIndex = _controller.index;
           if (_tabIndex == 0 && subscriptionList.length == 0) {
-            _getData(userId, userName);
+            _getData(userId, userName, _tabIndex);
           }
           if (_tabIndex == 1 && historyList.length == 0) {
-            _getData(userId, userName);
+            _getData(userId, userName, _tabIndex);
           }
           print(_tabIndex);
         }
       });
     });
-    _getData(userId, userName);
+    _getData(userId, userName, 0);
   }
 
-  Future<void> _getData(id, name) async {
+  Future<void> _getData(id, name, type) async {
     setState(() {
       loading = true;
       loadingText = '加载中...';
     });
     var res = ResponseData.fromJson(
-        await Model.save({'userId': id, 'username': name}));
+        await Model.save({'userId': id, 'username': name, 'type': type}));
     setState(() {
       loading = false;
     });
@@ -79,49 +105,55 @@ class _SubscriptionState extends State<Subscription>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: 150.0,
-            child: TabBar(
-              indicatorWeight: 2.0,
-              labelColor: Colors.black87,
-              // labelPadding: EdgeInsets.only(top: 5, bottom: 5),
-              unselectedLabelColor: Colors.black54,
-              unselectedLabelStyle: TextStyle(fontSize: 14, height: 0.2),
-              labelStyle: TextStyle(fontSize: 16),
-              controller: _controller, //控制器
-              indicatorColor: Colors.black87, //下划线颜色
-              indicatorSize: TabBarIndicatorSize.label,
-              indicatorPadding: EdgeInsets.zero,
-              tabs: tabs
-                  .map((item) => Tab(
-                        text: item.name,
-                      ))
-                  .toList(),
-            ),
+    return SmartRefresher(
+        enablePullDown: true,
+        enablePullUp: false,
+        header: MaterialClassicHeader(),
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                width: 150.0,
+                child: TabBar(
+                  indicatorWeight: 2.0,
+                  labelColor: Colors.black87,
+                  // labelPadding: EdgeInsets.only(top: 5, bottom: 5),
+                  unselectedLabelColor: Colors.black54,
+                  unselectedLabelStyle: TextStyle(fontSize: 14, height: 0.2),
+                  labelStyle: TextStyle(fontSize: 16),
+                  controller: _controller, //控制器
+                  indicatorColor: Colors.black87, //下划线颜色
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicatorPadding: EdgeInsets.zero,
+                  tabs: tabs
+                      .map((item) => Tab(
+                            text: item.name,
+                          ))
+                      .toList(),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: TabBarView(
+                  controller: _controller,
+                  children: tabs
+                      .map((item) => Stack(
+                            children: <Widget>[
+                              Books(
+                                  subscriptionList: item.key == '0'
+                                      ? subscriptionList
+                                      : historyList,
+                                  loadingText: loadingText)
+                            ],
+                          ))
+                      .toList(),
+                ),
+              )
+            ],
           ),
-          Expanded(
-            flex: 1,
-            child: TabBarView(
-              controller: _controller,
-              children: tabs
-                  .map((item) => Stack(
-                        children: <Widget>[
-                          Books(
-                              subscriptionList: item.key == '0'
-                                  ? subscriptionList
-                                  : historyList,
-                              loadingText: loadingText)
-                        ],
-                      ))
-                  .toList(),
-            ),
-          )
-        ],
-      ),
-    );
+        ));
   }
 }
 
@@ -168,11 +200,15 @@ class SubscriptionCard extends StatelessWidget {
   final double width = 105.0;
   handleTap(context) {
     Navigator.push(context, CupertinoPageRoute(builder: (context) {
-      return Detail(id: card['id']);
+      return Detail(id: card['manhua'].toString());
     }));
   }
+
   @override
   Widget build(BuildContext context) {
+    String lastChaperName = card['last_chapter'] > 0
+        ? '看到' + card['last_chapter_name'].toString()
+        : '未看';
     return GestureDetector(
       onTap: () {
         handleTap(context);
@@ -206,9 +242,7 @@ class SubscriptionCard extends StatelessWidget {
               alignment: Alignment.topLeft,
               width: width,
               child: Text(
-                card['last_chapter'] >= 0
-                    ? '看到' + card['last_chapter'].toString() + '话'
-                    : '未看',
+                lastChaperName,
                 maxLines: 1,
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),

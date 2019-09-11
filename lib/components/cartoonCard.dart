@@ -33,45 +33,48 @@ class CartoonCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(bottom: 7.0, top: 4.0),
+                      padding: EdgeInsets.only(bottom: 10.0, top: 4.0),
                       child: Text(
-                        data['name'],
+                        data['name'].toString().trim(),
                         maxLines: 1,
                         style: TextStyle(
-                            color: Colors.black87, height: 1.3, fontSize: 14.0),
+                            color: Colors.black87, height: 1.3, fontSize: 16.0),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
-                      '作者: ' + data['author'],
+                      '作者: ' + data['author'].toString().trim(),
                       maxLines: 1,
                       style: TextStyle(
                         height: 1.3,
-                        fontSize: 12.0,
+                        fontSize: 14.0,
                         color: Colors.black54,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      data['type'].join(' '),
+                      data['type'].join(' ').toString().trim(),
                       maxLines: 1,
                       style: TextStyle(
                         height: 1.3,
-                        fontSize: 12.0,
+                        fontSize: 14.0,
                         color: Colors.black54,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      '最新话' + data['chapter'],
+                    Padding(
+                      padding: EdgeInsets.only(top: 7.0),
+                      child: Text(
+                      '连载至: ' + data['chapter'].toString().trim(),
                       maxLines: 1,
                       style: TextStyle(
                         height: 1.3,
-                        color: Colors.black54,
-                        fontSize: 12.0,
+                        color: Colors.red[300],
+                        fontSize: 14.0,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    )
                     // Text(
                     //   data['date'],
                     //   maxLines: 1,
