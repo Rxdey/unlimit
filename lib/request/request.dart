@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:unlimit/api/api.dart';
 
+const HOST = 'http://45.76.203.52:9006';
 // const HOST = 'http://yapi.rxdey.xyz/mock/21';
-const HOST = 'http://10.255.74.163:9006';
+// const HOST = 'http://10.255.74.163:9006';
 
 /*
  * 封装 restful 请求
@@ -47,7 +48,8 @@ class HttpRequest {
     String method = config.method ?? 'GET';
     String url = config.url ?? '';
     String baseUrl = config.baseUrl ?? '';
-
+    data['username'] = 'jyh1994@qq.com';
+    data['userId'] = '1';
     data.forEach((key, value) {
       if (url.indexOf(key) != -1) {
         url = url.replaceAll(':$key', value.toString());

@@ -32,4 +32,6 @@ class Model {
       HttpRequest.request(Interface(url: '/anima/detail'), data); // 详情
   static var collect = (Map<String, dynamic> data) => HttpRequest.request(
       Interface(url: '/anima/collect'), data); // 添加历史记录/订阅/取消订阅
+  static var update = (Map<String, dynamic> data) => HttpRequest.request(Interface(url: '/anima/update'), data); // 更新记录
+  static var getRecord = (Map<String, dynamic> data) => HttpRequest.request(Interface(url: '/anima/getRecord'), data); // 获取记录
 }

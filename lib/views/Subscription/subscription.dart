@@ -20,12 +20,13 @@ class _SubscriptionState extends State<Subscription>
     TabList(name: '追漫', key: '0'),
     TabList(name: '历史', key: '1'),
   ];
-  String userName = 'jyh1994@qq.com';
-  String userId = '1';
   bool isLogin = false;
   bool loading = false;
-  String loadingText = '暂无订阅';
+  String loadingText = '暂无数据';
   int _tabIndex = 0;
+  int pageSize = 30;
+  List<int> pageList = [1, 1];
+  List<bool> loadingList = [true, true];
   bool get wantKeepAlive => true;
 
   RefreshController _refreshController =
@@ -33,24 +34,27 @@ class _SubscriptionState extends State<Subscription>
 
   void _onRefresh() async {
     // monitor network fetch
-    await _getData(userId, userName, _tabIndex);
+    setState(() {
+      pageList[_tabIndex] = 0;
+    });
     await Future.delayed(Duration(milliseconds: 1000));
+    await _getData(_tabIndex);
     // print('_onRefresh');
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
 
-  // void _onLoading() async {
-  //   // monitor network fetch
-  //   // await Future.delayed(Duration(milliseconds: 1000));
-  //   // await _getData(userId, userName, _tabIndex);
-  //   // if failed,use loadFailed(),if no data return,use LoadNodata()
-  //   if (mounted)
-  //     // setState(() {
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    await _getData(_tabIndex, true);
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if (mounted)
+      // setState(() {
 
-  //     // });
-  //     _refreshController.loadComplete();
-  // }
+      // });
+      _refreshController.loadComplete();
+  }
 
   @override
   void initState() {
@@ -62,156 +66,166 @@ class _SubscriptionState extends State<Subscription>
         if (_tabIndex != _controller.index) {
           _tabIndex = _controller.index;
           if (_tabIndex == 0 && subscriptionList.length == 0) {
-            _getData(userId, userName, _tabIndex);
+            _getData(_tabIndex);
           }
           if (_tabIndex == 1 && historyList.length == 0) {
-            _getData(userId, userName, _tabIndex);
+            _getData(_tabIndex);
           }
           print(_tabIndex);
         }
       });
     });
-    _getData(userId, userName, 0);
+    _getData(0);
   }
 
-  Future<void> _getData(id, name, type) async {
+  Future<void> _getData(type, [bool isloading = false]) async {
     setState(() {
       loading = true;
       loadingText = '加载中...';
     });
-    var res = ResponseData.fromJson(
-        await Model.save({'userId': id, 'username': name, 'type': type}));
+    var res = ResponseData.fromJson(await Model.save({
+      'type': type,
+      'pageNo': pageList[_tabIndex],
+      'pageSize': pageSize,
+      'st': new DateTime.now().millisecondsSinceEpoch
+    }));
     setState(() {
       loading = false;
+      loadingText = '暂无数据';
     });
     if (res.state == 0) {
       Fluttertoast.showToast(
           msg: res.msg, textColor: Colors.red, gravity: ToastGravity.CENTER);
-      return false;
+      return;
     }
     setState(() {
       if (_tabIndex == 0) {
-        subscriptionList = res.data;
+        isloading
+            ? subscriptionList.addAll(res.data)
+            : subscriptionList = res.data;
       } else {
-        historyList = res.data;
+        isloading ? historyList.addAll(res.data) : historyList = res.data;
       }
-
       loadingText = '暂无订阅';
+      if (res.data.length <= pageSize) {
+        loadingList[_tabIndex] = false;
+        return;
+      }
+      pageList[_tabIndex] += 1;
     });
-    print(res.data);
-    return true;
+    // print(res.data);
+    return;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return SmartRefresher(
-        enablePullDown: true,
-        enablePullUp: false,
-        header: MaterialClassicHeader(),
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                width: 150.0,
-                child: TabBar(
-                  indicatorWeight: 2.0,
-                  labelColor: Colors.black87,
-                  // labelPadding: EdgeInsets.only(top: 5, bottom: 5),
-                  unselectedLabelColor: Colors.black54,
-                  unselectedLabelStyle: TextStyle(fontSize: 14, height: 0.2),
-                  labelStyle: TextStyle(fontSize: 16),
-                  controller: _controller, //控制器
-                  indicatorColor: Colors.black87, //下划线颜色
-                  indicatorSize: TabBarIndicatorSize.label,
-                  indicatorPadding: EdgeInsets.zero,
-                  tabs: tabs
-                      .map((item) => Tab(
-                            text: item.name,
-                          ))
-                      .toList(),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: TabBarView(
-                  controller: _controller,
-                  children: tabs
-                      .map((item) => Stack(
-                            children: <Widget>[
-                              Books(
-                                  subscriptionList: item.key == '0'
-                                      ? subscriptionList
-                                      : historyList,
-                                  loadingText: loadingText)
-                            ],
-                          ))
-                      .toList(),
-                ),
-              )
-            ],
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: 150.0,
+            child: TabBar(
+              indicatorWeight: 2.0,
+              labelColor: Colors.black87,
+              // labelPadding: EdgeInsets.only(top: 5, bottom: 5),
+              unselectedLabelColor: Colors.black54,
+              unselectedLabelStyle: TextStyle(fontSize: 14, height: 0.2),
+              labelStyle: TextStyle(fontSize: 16),
+              controller: _controller, //控制器
+              indicatorColor: Colors.black87, //下划线颜色
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorPadding: EdgeInsets.zero,
+              tabs: tabs
+                  .map((item) => Tab(
+                        text: item.name,
+                      ))
+                  .toList(),
+            ),
           ),
-        ));
-  }
-}
-
-class Books extends StatelessWidget {
-  final List subscriptionList;
-  final String loadingText;
-  Books({this.subscriptionList, this.loadingText});
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: double.infinity,
-      ),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 5.0),
-        child: subscriptionList.length == 0
-            ? Text(
-                loadingText,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.lightBlue, height: 10),
-              )
-            : GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // 每行三列
-                  childAspectRatio: 0.65, // 显示区域宽高相等
-                  crossAxisSpacing: 0, // 水平间距
-                  mainAxisSpacing: 0, // 垂直间距
-                ),
-                padding: EdgeInsets.all(5.0),
-                itemCount: subscriptionList.length,
-                itemBuilder: (BuildContext context, idx) {
-                  return SubscriptionCard(subscriptionList[idx]);
-                },
-              ),
+          Expanded(
+            flex: 1,
+            child: TabBarView(
+              controller: _controller,
+              children: tabs
+                  .map((item) => Stack(
+                        children: <Widget>[
+                          booksWrap(
+                              item.key == '0' ? subscriptionList : historyList)
+                        ],
+                      ))
+                  .toList(),
+            ),
+          )
+        ],
       ),
     );
   }
-}
 
-class SubscriptionCard extends StatelessWidget {
-  final Map card;
-  SubscriptionCard(this.card);
-  final double width = 105.0;
-  handleTap(context) {
-    Navigator.push(context, CupertinoPageRoute(builder: (context) {
-      return Detail(id: card['manhua'].toString());
-    }));
+  Widget booksWrap(List currentList) {
+    return Container(
+      child: Scrollbar(
+        child: SmartRefresher(
+            enablePullDown: true,
+            enablePullUp: loadingList[_tabIndex],
+            header: MaterialClassicHeader(),
+            footer: CustomFooter(
+              builder: (BuildContext context, LoadStatus mode) {
+                Widget body;
+                if (mode == LoadStatus.idle) {
+                  body = Text("上拉加载");
+                } else if (mode == LoadStatus.loading) {
+                  body = CupertinoActivityIndicator();
+                } else if (mode == LoadStatus.failed) {
+                  body = Text("加载失败！点击重试！");
+                } else if (mode == LoadStatus.canLoading) {
+                  body = Text("松手,加载更多!");
+                } else {
+                  body = Text("没有更多数据了!");
+                }
+                return Container(
+                  height: 55.0,
+                  child: Center(child: body),
+                );
+              },
+            ),
+            controller: _refreshController,
+            onRefresh: _onRefresh,
+            onLoading: _onLoading,
+            child: ListView(
+              padding: EdgeInsets.all(28.0),
+              children: <Widget>[
+                currentList.length == 0
+                    ? Text(
+                        loadingText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.lightBlue, height: 10),
+                      )
+                    : Wrap(
+                        spacing: 10.0,
+                        runSpacing: 10.0,
+                        children: currentList
+                            .asMap()
+                            .map((key, item) => MapEntry(key, bookCard(item)))
+                            .values
+                            .toList(),
+                      )
+              ],
+            )),
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    String lastChaperName = card['last_chapter'] > 0
+  Widget bookCard(Map card) {
+    final double width = 105.0;
+    String lastChaperName = card['last_chapter'] > -1
         ? '看到' + card['last_chapter_name'].toString()
         : '未看';
     return GestureDetector(
       onTap: () {
-        handleTap(context);
+        Navigator.push(context, CupertinoPageRoute(builder: (context) {
+          return Detail(id: card['manhua'].toString());
+        }));
       },
       child: Container(
         child: Column(
@@ -253,3 +267,4 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 }
+

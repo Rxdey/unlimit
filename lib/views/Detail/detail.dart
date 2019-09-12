@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unlimit/components/iconfont.dart';
 import 'package:unlimit/model/model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unlimit/public/public.dart';
@@ -16,16 +17,25 @@ class _DetailState extends State<Detail> {
   List<String> chapterList;
   List<ChapterDetail> chapterDetail;
   List<String> tempList;
-  Map orderInfo;
+  // Map orderInfo;
   int isCollect = 0;
   int limit = 14;
   int active = -1;
-  String userId = '1';
-  String username = 'jyh1994@qq.com';
   @override
   void initState() {
     super.initState();
     _geDetail();
+  }
+
+  List getTempList(List list, int i) {
+    int len = list.length;
+    List tempArray;
+    if (len > i + 2) {
+      tempArray = list.sublist(0, limit);
+      tempArray.add('...');
+      tempArray.add(list[len - 1]);
+    }
+    return tempArray;
   }
 
   Future<void> _geDetail() async {
@@ -40,29 +50,35 @@ class _DetailState extends State<Detail> {
       animaInfo = res.data.animaInfo;
       chapterList = res.data.chapterList;
       chapterDetail = res.data.chapterDetail;
-      orderInfo = res.data.orderInfo;
-      isCollect = orderInfo != null ? orderInfo['isShow'] : 0;
-      active = orderInfo != null ? orderInfo['last_chapter'] : -1;
-      int len = this.chapterList.length;
-      tempList = chapterList;
-      if (len > limit + 2) {
-        tempList = this.chapterList.sublist(0, this.limit);
-        tempList.add('...');
-        tempList.add(this.chapterList[len - 1]);
-      }
+      tempList = getTempList(chapterList, limit);
       handleCollect(1);
+      _getOrderInfo();
     });
-    print(orderInfo);
+  }
+
+  Future<void> _getOrderInfo() async {
+    var json = await Model.getRecord(
+        {'manhua': widget.id, 'st': new DateTime.now().millisecondsSinceEpoch});
+    ResponseStringData res = ResponseStringData.fromJson(json);
+    if (res.state == 0) {
+      // Fluttertoast.showToast(msg: res.msg, gravity: ToastGravity.CENTER);
+      print('异常: ' + res.msg);
+      return;
+    }
+    setState(() {
+      isCollect = res.data != null ? res.data['isShow'] : 0;
+      active = res.data != null ? res.data['last_chapter'] : -1;
+    });
+    print('记录信息: ' + res.data.toString());
   }
 
   Future<void> handleCollect(int state) async {
     var json = await Model.collect({
-      'userId': userId,
-      'username': username,
       'manhua': widget.id,
       'cover': animaInfo.cover,
       'name': animaInfo.name,
-      'state': state
+      'state': state,
+      'st': new DateTime.now().millisecondsSinceEpoch
     });
     ResponseStringData res = ResponseStringData.fromJson(json);
     if (state == 2)
@@ -73,82 +89,133 @@ class _DetailState extends State<Detail> {
     });
   }
 
+  Future<void> _chaperClick(int key, String name) async {
+    if (name == '...') {
+      this._showModalBottomSheet(context);
+      return;
+    }
+    var json = await Model.update({
+      'manhua': widget.id,
+      'lastChapter': key,
+      'lastChapterName': name,
+      'st': new DateTime.now().millisecondsSinceEpoch
+    });
+    ResponseData res = ResponseData.fromJson(json);
+    if (res.state == 0) {
+      Fluttertoast.showToast(msg: res.msg, gravity: ToastGravity.CENTER);
+      print('异常: ' + res.msg);
+      return;
+    }
+    setState(() {
+      active = key;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String title = '全部章节 (' +
         (animaInfo != null ? animaInfo.chapter.toString() : '0') +
         ')';
     return Scaffold(
-      body: Scrollbar(
-        child: Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _cover(),
-              Expanded(
-                flex: 1,
-                child: ListView(
-                  padding: EdgeInsets.all(0),
+      body: chapterList != null
+          ? Scrollbar(
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    animaInfo != null ? _desc() : Container(),
-                    Container(
-                      padding: EdgeInsets.only(left: 10.0, right: 10.0),
-                      child: Text(title, style: TextStyle(fontSize: 14.0)),
-                    ),
-                    tempList != null ? _chapters(context) : Container(),
-                    Padding(
-                      padding: EdgeInsets.all(30.0),
+                    _cover(),
+                    Expanded(
+                      flex: 1,
+                      child: ListView(
+                        padding: EdgeInsets.all(0),
+                        children: <Widget>[
+                          _desc(),
+                          Container(
+                            padding: EdgeInsets.only(left: 10.0, right: 15.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(title, style: TextStyle(fontSize: 14.0)),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     setState(() {
+                                //       tempList = getTempList(
+                                //           chapterList.reversed.toList(), limit);
+                                //     });
+                                //   },
+                                //   child: Icon(
+                                //     IconFont.order_left,
+                                //     size: 14.0,
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                          ),
+                          _chapters(context),
+                          Padding(
+                            padding: EdgeInsets.all(30.0),
+                          )
+                        ],
+                      ),
                     )
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(30.0, 8.0, 15.0, 8.0),
-        decoration: BoxDecoration(color: Colors.white, boxShadow: [
-          BoxShadow(color: Colors.grey[100], blurRadius: 5.0, spreadRadius: 5.0)
-        ]),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                handleCollect(2);
-              },
+              ),
+            )
+          : Container(
+              alignment: Alignment.center,
+              child: Text(
+                '加载中...',
+                style: TextStyle(height: 10, color: Colors.blue[300]),
+              ),
+            ),
+      bottomNavigationBar: chapterList != null
+          ? Container(
+              padding: EdgeInsets.fromLTRB(30.0, 8.0, 15.0, 8.0),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [
+                BoxShadow(
+                    color: Colors.grey[100], blurRadius: 5.0, spreadRadius: 5.0)
+              ]),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Icon(
-                    Icons.favorite,
-                    color: isCollect == 1 ? Colors.orange : Colors.black26,
-                    size: 22,
+                  GestureDetector(
+                    onTap: () {
+                      handleCollect(2);
+                    },
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.favorite,
+                          color:
+                              isCollect == 1 ? Colors.orange : Colors.black26,
+                          size: 22,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 5.0),
+                          child: Text(isCollect == 1 ? '已追漫' : '追漫'),
+                        )
+                      ],
+                    ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 5.0),
-                    child: Text(isCollect == 1 ? '已追漫' : '追漫'),
-                  )
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
+                      decoration: BoxDecoration(
+                          color: Colors.blue[300],
+                          borderRadius: BorderRadius.circular(60)),
+                      child: Text(
+                        '开始阅读',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.only(
-                    left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
-                decoration: BoxDecoration(
-                    color: Colors.blue[300],
-                    borderRadius: BorderRadius.circular(60)),
-                child: Text(
-                  '开始阅读',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+            )
+          : Container(),
     );
   }
 
@@ -157,15 +224,13 @@ class _DetailState extends State<Detail> {
       width: double.infinity,
       color: Colors.black,
       height: 270.0,
-      child: animaInfo != null
-          ? ClipRect(
-              child: FadeInImage.assetNetwork(
-                placeholder: 'lib/assets/image/v.png',
-                image: animaInfo.cover,
-                fit: BoxFit.contain,
-              ),
-            )
-          : Text('加载失败'),
+      child: ClipRect(
+        child: FadeInImage.assetNetwork(
+          placeholder: 'lib/assets/image/v.png',
+          image: animaInfo.cover,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 
@@ -224,10 +289,12 @@ class _DetailState extends State<Detail> {
             Container(
               child: InkWell(
                 onTap: () {
-                  if (item == '...') {
-                    this._showModalBottomSheet(context);
-                    return;
-                  }
+                  _chaperClick(key, item);
+                  // if (item == '...') {
+                  //   this._showModalBottomSheet(context);
+                  //   return;
+                  // }
+                  // print(item);
                   // Navigator.push(context, CupertinoPageRoute(builder: (context) {
                   //   return Reader(url: item['url']);
                   // }));

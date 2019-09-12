@@ -27,7 +27,7 @@ class _SearchState extends State<Search> with AutomaticKeepAliveClientMixin {
 
   Future<void> _handleSearch(val) async {
     if (val == null || loading) return;
-    var data = {'start': val};
+    var data = {'start': val, 'st': new DateTime.now().millisecondsSinceEpoch};
     setState(() {
       loading = true;
       loadText = '加载中...';

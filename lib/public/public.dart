@@ -36,16 +36,16 @@ class Data {
   List<String> chapterList;
   AnimaInfo animaInfo;
   List<ChapterDetail> chapterDetail;
-  Map orderInfo;
+  // Map orderInfo;
 
-  Data({this.chapterList, this.animaInfo, this.chapterDetail, this.orderInfo});
+  Data({this.chapterList, this.animaInfo, this.chapterDetail});
 
   Data.fromJson(Map<String, dynamic> json) {
     chapterList = json['chapterList'].cast<String>();
     animaInfo = json['animaInfo'] != null
         ? new AnimaInfo.fromJson(json['animaInfo'])
         : null;
-    orderInfo = json['orderInfo'] != null ? json['orderInfo'] : null;
+    // orderInfo = json['orderInfo'] != null ? json['orderInfo'] : null;
     if (json['chapterDetail'] != null) {
       chapterDetail = new List<ChapterDetail>();
       json['chapterDetail'].forEach((v) {
