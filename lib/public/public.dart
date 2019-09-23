@@ -35,10 +35,10 @@ class DetailData {
 class Data {
   List<String> chapterList;
   AnimaInfo animaInfo;
-  List<ChapterDetail> chapterDetail;
+  // List<ChapterDetail> chapterDetail;
   // Map orderInfo;
 
-  Data({this.chapterList, this.animaInfo, this.chapterDetail});
+  Data({this.chapterList, this.animaInfo});
 
   Data.fromJson(Map<String, dynamic> json) {
     chapterList = json['chapterList'].cast<String>();
@@ -46,12 +46,12 @@ class Data {
         ? new AnimaInfo.fromJson(json['animaInfo'])
         : null;
     // orderInfo = json['orderInfo'] != null ? json['orderInfo'] : null;
-    if (json['chapterDetail'] != null) {
-      chapterDetail = new List<ChapterDetail>();
-      json['chapterDetail'].forEach((v) {
-        chapterDetail.add(new ChapterDetail.fromJson(v));
-      });
-    }
+    // if (json['chapterDetail'] != null) {
+    //   chapterDetail = new List<ChapterDetail>();
+    //   json['chapterDetail'].forEach((v) {
+    //     chapterDetail.add(new ChapterDetail.fromJson(v));
+    //   });
+    // }
   }
 
   Map<String, dynamic> toJson() {
@@ -60,10 +60,10 @@ class Data {
     if (this.animaInfo != null) {
       data['animaInfo'] = this.animaInfo.toJson();
     }
-    if (this.chapterDetail != null) {
-      data['chapterDetail'] =
-          this.chapterDetail.map((v) => v.toJson()).toList();
-    }
+    // if (this.chapterDetail != null) {
+    //   data['chapterDetail'] =
+    //       this.chapterDetail.map((v) => v.toJson()).toList();
+    // }
     return data;
   }
 }
@@ -117,24 +117,75 @@ class AnimaInfo {
   }
 }
 
-class ChapterDetail {
-  String totle;
-  String current;
-  List<String> list;
+// class ChapterDetail {
+//   String totle;
+//   String current;
+//   List<String> list;
 
-  ChapterDetail({this.totle, this.current, this.list});
+//   ChapterDetail({this.totle, this.current, this.list});
 
-  ChapterDetail.fromJson(Map<String, dynamic> json) {
-    totle = json['totle'];
-    current = json['current'];
-    // list = json['list'].cast<String>();
+//   ChapterDetail.fromJson(Map<String, dynamic> json) {
+//     totle = json['totle'];
+//     current = json['current'];
+//     // list = json['list'].cast<String>();
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['totle'] = this.totle;
+//     data['current'] = this.current;
+//     // data['list'] = this.list;
+//     return data;
+//   }
+// }
+
+class ChaperDetail {
+  int state;
+  String msg;
+  List<DataList> data;
+
+  ChaperDetail({this.state, this.msg, this.data});
+
+  ChaperDetail.fromJson(Map<String, dynamic> json) {
+    state = json['state'];
+    msg = json['msg'];
+    if (json['data'] != null) {
+      data = new List<DataList>();
+      json['data'].forEach((v) {
+        data.add(new DataList.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['state'] = this.state;
+    data['msg'] = this.msg;
+    if (this.data != null) {
+      data['data'] = this.data.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class DataList {
+  List<String> list;
+  String totle;
+  String current;
+
+  DataList({this.list, this.totle, this.current});
+
+  DataList.fromJson(Map<dynamic, dynamic> json) {
+    list = json['list'].cast<String>();
+    totle = json['totle'];
+    current = json['current'];
+  }
+
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+    data['list'] = this.list;
     data['totle'] = this.totle;
     data['current'] = this.current;
-    // data['list'] = this.list;
     return data;
   }
 }

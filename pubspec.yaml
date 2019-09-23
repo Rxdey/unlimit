@@ -41,6 +41,8 @@ flutter:
   assets:
     - lib/assets/image/default.png
     - lib/assets/image/v.png
+    - lib/assets/image/load.png
+    - lib/assets/image/loading.gif
   fonts:
     - family: IconFont
       fonts:

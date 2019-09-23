@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:unlimit/components/iconfont.dart';
+// import 'package:unlimit/components/iconfont.dart';
 import 'package:unlimit/model/model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unlimit/public/public.dart';
+import 'package:unlimit/views/Reader/reader.dart';
 
 class Detail extends StatefulWidget {
   final String id;
@@ -15,12 +16,14 @@ class Detail extends StatefulWidget {
 class _DetailState extends State<Detail> {
   AnimaInfo animaInfo;
   List<String> chapterList;
-  List<ChapterDetail> chapterDetail;
+  // List<ChapterDetail> chapterDetail;
   List<String> tempList;
   // Map orderInfo;
   int isCollect = 0;
   int limit = 14;
   int active = -1;
+  int lastPage = 0;
+  String lastChapterName = '-';
   @override
   void initState() {
     super.initState();
@@ -49,7 +52,7 @@ class _DetailState extends State<Detail> {
     setState(() {
       animaInfo = res.data.animaInfo;
       chapterList = res.data.chapterList;
-      chapterDetail = res.data.chapterDetail;
+      // chapterDetail = res.data.chapterDetail;
       tempList = getTempList(chapterList, limit);
       handleCollect(1);
       _getOrderInfo();
@@ -68,6 +71,8 @@ class _DetailState extends State<Detail> {
     setState(() {
       isCollect = res.data != null ? res.data['isShow'] : 0;
       active = res.data != null ? res.data['last_chapter'] : -1;
+      lastPage = res.data != null ? res.data['last_page'] : 0;
+      lastChapterName = res.data != null ? res.data['last_chapter_name'] : '-';
     });
     print('记录信息: ' + res.data.toString());
   }
@@ -98,6 +103,7 @@ class _DetailState extends State<Detail> {
       'manhua': widget.id,
       'lastChapter': key,
       'lastChapterName': name,
+      'lastPage': 0,
       'st': new DateTime.now().millisecondsSinceEpoch
     });
     ResponseData res = ResponseData.fromJson(json);
@@ -109,6 +115,13 @@ class _DetailState extends State<Detail> {
     setState(() {
       active = key;
     });
+    this._goToReader();
+  }
+
+  _goToReader() {
+    Navigator.push(context, CupertinoPageRoute(builder: (context) {
+      return Reader(id: widget.id);
+    }));
   }
 
   @override
@@ -199,7 +212,7 @@ class _DetailState extends State<Detail> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: _goToReader,
                     child: Container(
                       padding: EdgeInsets.only(
                           left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
@@ -207,7 +220,7 @@ class _DetailState extends State<Detail> {
                           color: Colors.blue[300],
                           borderRadius: BorderRadius.circular(60)),
                       child: Text(
-                        '开始阅读',
+                        active == -1 ? '开始阅读' : '继续阅读(' + lastChapterName + ')',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -290,14 +303,6 @@ class _DetailState extends State<Detail> {
               child: InkWell(
                 onTap: () {
                   _chaperClick(key, item);
-                  // if (item == '...') {
-                  //   this._showModalBottomSheet(context);
-                  //   return;
-                  // }
-                  // print(item);
-                  // Navigator.push(context, CupertinoPageRoute(builder: (context) {
-                  //   return Reader(url: item['url']);
-                  // }));
                 },
                 child: Container(
                     padding: EdgeInsets.fromLTRB(0, 12, 0, 12),

@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
           onPageChanged: _pageChange,
           controller: _pageController,
           itemBuilder: (BuildContext context, int index) {
-            print(index);
+            // print(index);
             return tabs[index].page;
           },
           itemCount: tabs.length,
