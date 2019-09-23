@@ -63,7 +63,7 @@ class _ReaderState extends State<Reader> {
       body: GestureDetector(
         child: Container(
           child: currentChapter != null
-              ? Swiper(imgList: currentChapter.list)
+              ? Swiper(imgList: currentChapter.list, onEnd: () {})
               : Text('加载中...'),
         ),
       ),

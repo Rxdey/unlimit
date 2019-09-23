@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class Swiper extends StatefulWidget {
   final List<String> imgList;
   final bool reverse;
-  Swiper({this.imgList, this.reverse = true, Key key}) : super(key: key);
+  final Function onEnd;
+  Swiper({this.imgList, this.reverse = true, this.onEnd, Key key}) : super(key: key);
   @override
   _SwiperState createState() => _SwiperState();
 }
@@ -22,9 +23,10 @@ class _SwiperState extends State<Swiper> {
 
   _onPageChanged(index) {
     if (index == count - 1) {
-      
+      widget.onEnd();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,7 +40,10 @@ class _SwiperState extends State<Swiper> {
               color: Colors.black,
               width: double.infinity,
               height: double.infinity,
-              child: Image.network(widget.imgList[index], scale: 1.0,),
+              child: Image.network(
+                widget.imgList[index],
+                scale: 1.0,
+              ),
             );
           }),
     );
