@@ -1,48 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:unlimit/components/preload_page_view.dart';
 
 class Swiper extends StatefulWidget {
-  final List<String> imgList;
+  final List imgList;
   final bool reverse;
-  final Function onEnd;
-  Swiper({this.imgList, this.reverse = true, this.onEnd, Key key}) : super(key: key);
+  final Function onChange;
+  final Function contentTap;
+  final int initialPage;
+  final int page;
+  Swiper(
+      {this.imgList,
+      this.reverse = true,
+      this.onChange,
+      this.contentTap,
+      this.initialPage = 0,
+      this.page = 0,
+      Key key})
+      : super(key: key);
   @override
   _SwiperState createState() => _SwiperState();
 }
 
 class _SwiperState extends State<Swiper> {
-  int count = 0;
-  PageController _pageController;
+  PreloadPageController _pageController;
   // int _currentIndex = 0;
   @override
   void initState() {
     super.initState();
     setState(() {
-      count = widget.imgList.length;
+      _pageController = PreloadPageController(initialPage: widget.initialPage);
     });
   }
 
   _onPageChanged(index) {
-    if (index == count - 1) {
-      widget.onEnd();
-    }
+    widget.onChange(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: PageView.builder(
+      child: PreloadPageView.builder(
           controller: _pageController,
           onPageChanged: _onPageChanged,
           reverse: widget.reverse,
-          itemCount: count,
+          itemCount: widget.imgList.length,
+          preloadPagesCount: 3,
           itemBuilder: (context, index) {
-            return Container(
-              color: Colors.black,
-              width: double.infinity,
-              height: double.infinity,
-              child: Image.network(
-                widget.imgList[index],
-                scale: 1.0,
+            return GestureDetector(
+              onTap: () {
+                widget.contentTap(index, widget.imgList[index], widget.imgList);
+              },
+              child: Container(
+                color: Colors.black87,
+                width: double.infinity,
+                height: double.infinity,
+                child: Image.network(
+                  widget.imgList[index]['url'],
+                  scale: 1.0,
+                ),
               ),
             );
           }),

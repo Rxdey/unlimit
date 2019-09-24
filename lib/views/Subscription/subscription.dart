@@ -39,8 +39,6 @@ class _SubscriptionState extends State<Subscription>
     });
     await Future.delayed(Duration(milliseconds: 1000));
     await _getData(_tabIndex);
-    // print('_onRefresh');
-    // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
 
@@ -89,6 +87,7 @@ class _SubscriptionState extends State<Subscription>
       'pageSize': pageSize,
       'st': new DateTime.now().millisecondsSinceEpoch
     }));
+    _refreshController.refreshCompleted();
     setState(() {
       loading = false;
       loadingText = '暂无数据';
@@ -193,7 +192,7 @@ class _SubscriptionState extends State<Subscription>
             onRefresh: _onRefresh,
             onLoading: _onLoading,
             child: ListView(
-              padding: EdgeInsets.all(28.0),
+              padding: EdgeInsets.all(24.0),
               children: <Widget>[
                 currentList.length == 0
                     ? Text(
@@ -204,6 +203,7 @@ class _SubscriptionState extends State<Subscription>
                     : Wrap(
                         spacing: 10.0,
                         runSpacing: 10.0,
+                        alignment: WrapAlignment.start,
                         children: currentList
                             .asMap()
                             .map((key, item) => MapEntry(key, bookCard(item)))
@@ -267,4 +267,3 @@ class _SubscriptionState extends State<Subscription>
     );
   }
 }
-

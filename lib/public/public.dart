@@ -169,16 +169,18 @@ class ChaperDetail {
 }
 
 class DataList {
-  List<String> list;
+  List list;
   String totle;
   String current;
+  String chapterName;
 
-  DataList({this.list, this.totle, this.current});
+  DataList({this.list, this.totle, this.current, this.chapterName});
 
   DataList.fromJson(Map<dynamic, dynamic> json) {
-    list = json['list'].cast<String>();
+    list = json['list'];
     totle = json['totle'];
     current = json['current'];
+    chapterName = json['chapterName'];
   }
 
   Map<dynamic, dynamic> toJson() {
@@ -186,6 +188,7 @@ class DataList {
     data['list'] = this.list;
     data['totle'] = this.totle;
     data['current'] = this.current;
+    data['chapterName'] = this.chapterName;
     return data;
   }
 }

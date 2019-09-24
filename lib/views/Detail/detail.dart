@@ -30,6 +30,12 @@ class _DetailState extends State<Detail> {
     _geDetail();
   }
 
+  @override
+  void deactivate() {
+    super.deactivate();
+    this._getOrderInfo();
+  }
+
   List getTempList(List list, int i) {
     int len = list.length;
     List tempArray;
@@ -130,8 +136,15 @@ class _DetailState extends State<Detail> {
         (animaInfo != null ? animaInfo.chapter.toString() : '0') +
         ')';
     return Scaffold(
-      body: chapterList != null
-          ? Scrollbar(
+      body: chapterList == null
+          ? Container(
+              alignment: Alignment.center,
+              child: Text(
+                '加载中...',
+                style: TextStyle(color: Colors.blue[300]),
+              ),
+            )
+          : Scrollbar(
               child: Container(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,18 +162,6 @@ class _DetailState extends State<Detail> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(title, style: TextStyle(fontSize: 14.0)),
-                                // GestureDetector(
-                                //   onTap: () {
-                                //     setState(() {
-                                //       tempList = getTempList(
-                                //           chapterList.reversed.toList(), limit);
-                                //     });
-                                //   },
-                                //   child: Icon(
-                                //     IconFont.order_left,
-                                //     size: 14.0,
-                                //   ),
-                                // ),
                               ],
                             ),
                           ),
@@ -173,13 +174,6 @@ class _DetailState extends State<Detail> {
                     )
                   ],
                 ),
-              ),
-            )
-          : Container(
-              alignment: Alignment.center,
-              child: Text(
-                '加载中...',
-                style: TextStyle(height: 10, color: Colors.blue[300]),
               ),
             ),
       bottomNavigationBar: chapterList != null
@@ -212,7 +206,13 @@ class _DetailState extends State<Detail> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: _goToReader,
+                    onTap: () {
+                      if (active == -1) {
+                        _chaperClick(0, chapterList[0]);
+                        return;
+                      }
+                      _goToReader();
+                    },
                     child: Container(
                       padding: EdgeInsets.only(
                           left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
@@ -264,8 +264,11 @@ class _DetailState extends State<Detail> {
             margin: EdgeInsets.only(bottom: 5.0),
             child: Row(
               children: <Widget>[
-                Text('作者: ' + animaInfo.author,
-                    style: TextStyle(fontSize: 14.0, color: Colors.black54)),
+                Expanded(
+                  child: Text('作者: ' + animaInfo.author,
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 14.0, color: Colors.black54)),
+                ),
                 Padding(
                     padding: EdgeInsets.only(left: 5.0, right: 5.0),
                     child: Text('·')),
@@ -285,7 +288,8 @@ class _DetailState extends State<Detail> {
 
   Widget _chapters(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.only(top: 10.0),
+      alignment: Alignment.center,
       child: Wrap(
         spacing: 10.0,
         runSpacing: 10.0,
