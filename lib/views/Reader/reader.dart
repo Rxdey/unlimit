@@ -3,6 +3,7 @@ import 'package:unlimit/model/model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:unlimit/public/public.dart';
 import 'package:unlimit/components/swiper.dart';
+import 'package:unlimit/util/util.dart';
 
 // import 'package:unlimit/public/json.dart';
 
@@ -51,8 +52,11 @@ class _ReaderState extends State<Reader> {
       return;
     }
     int cha = res.data['last_chapter'] > 0 ? res.data['last_chapter'] : 0;
+    String pages = await getStringItem(widget.id.toString());
+    print('当前页>>>>>>>>>>>>>>>>>>>>' + (pages ?? 0).toString());
     setState(() {
-      lastPage = res.data['last_page'] ?? 0;
+      lastPage = int.parse(pages ?? '0');
+      currendIndex = int.parse(pages ?? '0');
       lastChapter = cha;
       currentChapterIndex = cha;
       currentChapter = createImgList(dataList[cha]);
@@ -60,7 +64,7 @@ class _ReaderState extends State<Reader> {
     });
   }
 
-  handleOnChange(index) {
+  handleOnChange(index) async {
     // if (index == 0) {
     //   setState(() {
     //     currentChapter = dataList[currentChapterIndex - 1];
@@ -70,6 +74,7 @@ class _ReaderState extends State<Reader> {
     //     currentChapterIndex = currentChapterIndex - 1;
     //   });
     // }
+    await setStringItem(widget.id, lastList[currendIndex]['current'].toString());
     setState(() {
       currendIndex = index;
     });
@@ -128,11 +133,13 @@ class _ReaderState extends State<Reader> {
                     imgList: lastList,
                     onChange: handleOnChange,
                     contentTap: handleContentTap,
+                    initialPage: lastPage,
                   )
                 : Container(
                     alignment: Alignment.center,
+                    color: Colors.black87,
                     child: Text('加载中...',
-                        style: TextStyle(color: Colors.blue[300], height: 8.0)),
+                        style: TextStyle(color: Colors.white, height: 8.0)),
                   )),
       ),
       bottomNavigationBar: Container(
