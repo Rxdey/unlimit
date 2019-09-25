@@ -121,12 +121,12 @@ class _DetailState extends State<Detail> {
     setState(() {
       active = key;
     });
-    this._goToReader();
+    this._goToReader(name);
   }
 
-  _goToReader() {
+  _goToReader(String chapterName) {
     Navigator.push(context, CupertinoPageRoute(builder: (context) {
-      return Reader(id: widget.id);
+      return Reader(id: widget.id, chapterName: chapterName);
     }));
   }
 
@@ -211,7 +211,7 @@ class _DetailState extends State<Detail> {
                         _chaperClick(0, chapterList[0]);
                         return;
                       }
-                      _goToReader();
+                      _goToReader(lastChapterName);
                     },
                     child: Container(
                       padding: EdgeInsets.only(

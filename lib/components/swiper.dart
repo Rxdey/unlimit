@@ -8,15 +8,7 @@ class Swiper extends StatefulWidget {
   final Function contentTap;
   final int initialPage;
   final int page;
-  Swiper(
-      {this.imgList,
-      this.reverse = true,
-      this.onChange,
-      this.contentTap,
-      this.initialPage = 0,
-      this.page = 0,
-      Key key})
-      : super(key: key);
+  Swiper({this.imgList, this.reverse = true, this.onChange, this.contentTap, this.initialPage = 0, this.page = 0, Key key}) : super(key: key);
   @override
   _SwiperState createState() => _SwiperState();
 }

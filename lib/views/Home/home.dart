@@ -12,17 +12,26 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<TabList> tabs = [
-    TabList(name: '订阅', key: 'sub', icon: Icon(IconFont.wenjian), page: SafeArea(child: Subscription(),)),
+    TabList(
+        name: '订阅',
+        key: 'sub',
+        icon: Icon(IconFont.wenjian),
+        page: SafeArea(
+          child: Subscription(),
+        )),
     TabList(name: '搜索', key: 'search', icon: Icon(IconFont.sousuo), page: Search()),
     TabList(name: '我的', key: 'user', icon: Icon(IconFont.wode), page: User()),
   ];
   PageController _pageController = PageController();
 
   int _navIndex = 0;
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
   void handleNavChange(index) {
-    _pageController.animateToPage(index,
-        duration: Duration(milliseconds: 300), curve: Curves.ease);
+    _pageController.animateToPage(index, duration: Duration(milliseconds: 300), curve: Curves.ease);
     _pageChange(index);
   }
 
@@ -59,10 +68,7 @@ class _HomeState extends State<Home> {
         unselectedFontSize: 12.0,
         iconSize: 18.0,
         selectedItemColor: Colors.redAccent,
-        items: tabs
-            .map((item) => BottomNavigationBarItem(
-                icon: item.icon, title: Text(item.name)))
-            .toList(),
+        items: tabs.map((item) => BottomNavigationBarItem(icon: item.icon, title: Text(item.name))).toList(),
       ),
     );
   }

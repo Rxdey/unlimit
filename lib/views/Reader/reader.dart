@@ -9,7 +9,8 @@ import 'package:unlimit/util/util.dart';
 
 class Reader extends StatefulWidget {
   final String id;
-  Reader({Key key, this.id}) : super(key: key);
+  final String chapterName;
+  Reader({Key key, this.id, this.chapterName}) : super(key: key);
   @override
   _ReaderState createState() => _ReaderState();
 }
@@ -29,7 +30,9 @@ class _ReaderState extends State<Reader> {
   }
 
   Future<void> _geChaperDetail() async {
-    var json = await Model.getImageUrl({'id': widget.id});
+    var json = await Model.getImageUrl({
+      'id': widget.id
+    });
     ChaperDetail res = ChaperDetail.fromJson(json);
     if (res.state == 0) {
       Fluttertoast.showToast(msg: res.msg, gravity: ToastGravity.CENTER);
@@ -44,23 +47,30 @@ class _ReaderState extends State<Reader> {
   }
 
   Future<void> _getRecord() async {
-    var json = await Model.getRecord(
-        {'manhua': widget.id, 'st': new DateTime.now().millisecondsSinceEpoch});
+    var json = await Model.getRecord({
+      'manhua': widget.id,
+      'st': new DateTime.now().millisecondsSinceEpoch
+    });
     ResponseStringData res = ResponseStringData.fromJson(json);
     if (res.state == 0) {
       print('异常: ' + res.msg);
       return;
     }
     int cha = res.data['last_chapter'] > 0 ? res.data['last_chapter'] : 0;
-    String pages = await getStringItem(widget.id.toString());
-    print('当前页>>>>>>>>>>>>>>>>>>>>' + (pages ?? 0).toString());
+    String pages = await getStringItem(widget.id.toString() + widget.chapterName);
+    List temp = createImgList(dataList[cha]).list;
+    int cdx = int.parse(pages ?? '0');
+    // if (cha - 1 >= 0) {
+    //   temp.insertAll(0, createImgList(dataList[cha - 1]).list);
+    //   cdx = (dataList[cha - 1]).list.length + cdx;
+    // }
     setState(() {
       lastPage = int.parse(pages ?? '0');
-      currendIndex = int.parse(pages ?? '0');
+      currendIndex = cdx;
       lastChapter = cha;
       currentChapterIndex = cha;
       currentChapter = createImgList(dataList[cha]);
-      lastList.addAll(createImgList(dataList[cha]).list);
+      lastList = temp;
     });
   }
 
@@ -74,7 +84,8 @@ class _ReaderState extends State<Reader> {
     //     currentChapterIndex = currentChapterIndex - 1;
     //   });
     // }
-    await setStringItem(widget.id, lastList[currendIndex]['current'].toString());
+    // print('当前页>>>>>>>>>>>>>>>>>>>>' + lastList[index]['current'].toString());
+    await setStringItem(widget.id.toString() + widget.chapterName, lastList[currendIndex]['current'].toString());
     setState(() {
       currendIndex = index;
     });
@@ -133,13 +144,12 @@ class _ReaderState extends State<Reader> {
                     imgList: lastList,
                     onChange: handleOnChange,
                     contentTap: handleContentTap,
-                    initialPage: lastPage,
+                    initialPage: currendIndex,
                   )
                 : Container(
                     alignment: Alignment.center,
                     color: Colors.black87,
-                    child: Text('加载中...',
-                        style: TextStyle(color: Colors.white, height: 8.0)),
+                    child: Text('加载中...', style: TextStyle(color: Colors.white, height: 8.0)),
                   )),
       ),
       bottomNavigationBar: Container(
@@ -153,25 +163,15 @@ class _ReaderState extends State<Reader> {
               right: 0,
               child: Container(
                 color: Colors.black,
-                padding: EdgeInsets.only(
-                    left: 18.0, right: 18.0, top: 5.0, bottom: 5.0),
+                padding: EdgeInsets.only(left: 18.0, right: 18.0, top: 5.0, bottom: 5.0),
                 child: Row(
                   children: <Widget>[
                     Container(
-                      child: lastList.length != 0
-                          ? Text(lastList[currendIndex]['chapterName'],
-                              style: TextStyle(color: Colors.white))
-                          : Text('--'),
+                      child: lastList.length != 0 ? Text(lastList[currendIndex]['chapterName'], style: TextStyle(color: Colors.white)) : Text('--'),
                     ),
                     Container(
                       margin: EdgeInsets.only(left: 10.0),
-                      child: lastList.length != 0
-                          ? Text(
-                              lastList[currendIndex]['current'].toString() +
-                                  '/' +
-                                  lastList[currendIndex]['totle'].toString(),
-                              style: TextStyle(color: Colors.white))
-                          : Text('1/1'),
+                      child: lastList.length != 0 ? Text(lastList[currendIndex]['current'].toString() + '/' + lastList[currendIndex]['totle'].toString(), style: TextStyle(color: Colors.white)) : Text('1/1'),
                     )
                   ],
                 ),

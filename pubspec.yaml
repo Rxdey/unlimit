@@ -28,6 +28,7 @@ dependencies:
   shared_preferences: ^0.5.3+4
   pull_to_refresh: ^1.5.6
   preload_page_view: ^0.1.4
+  get_it: ^3.0.1
 
 dev_dependencies:
   flutter_test:

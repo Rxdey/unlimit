@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:unlimit/components/baseContainer.dart';
 import 'package:unlimit/components/iconfont.dart';
+import 'package:unlimit/util/util.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Cell {
   String label;
@@ -8,12 +10,8 @@ class Cell {
   Icon icon;
   bool arrow;
   double margin;
-  Cell(
-      {this.label = '',
-      this.value = '',
-      this.icon,
-      this.arrow = true,
-      this.margin = 0});
+  Function onClick;
+  Cell({this.label = '', this.value = '', this.icon, this.arrow = true, this.margin = 0, this.onClick});
 }
 
 class User extends StatefulWidget {
@@ -24,6 +22,12 @@ class User extends StatefulWidget {
 class _UserState extends State<User> {
   List<Cell> cellList = [
     Cell(label: '修改资料'),
+    Cell(
+        label: '清空缓存',
+        onClick: () async {
+          bool isClear = await clearAll();
+          Fluttertoast.showToast(msg: isClear ? '缓存已清空' : '清空失败', textColor: Colors.white, gravity: ToastGravity.CENTER);
+        }),
     Cell(label: '设置'),
     Cell(label: '退出登录', arrow: false, margin: 10.0)
   ];
@@ -35,15 +39,11 @@ class _UserState extends State<User> {
           color: Colors.white,
           child: Ink(
               child: InkWell(
-            onTap: () {},
+            onTap: cell.onClick,
             child: Container(
               padding: EdgeInsets.all(15.0),
               decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(width: .2, color: Colors.black26),
-                    top: cell.margin != 0
-                        ? BorderSide(width: .2, color: Colors.black26)
-                        : BorderSide.none),
+                border: Border(bottom: BorderSide(width: .2, color: Colors.black26), top: cell.margin != 0 ? BorderSide(width: .2, color: Colors.black26) : BorderSide.none),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,10 +91,7 @@ class _UserState extends State<User> {
                   child: Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.only(top: 50.0, bottom: 30.0),
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom:
-                                BorderSide(width: .2, color: Colors.black26))),
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(width: .2, color: Colors.black26))),
                     child: Column(
                       children: <Widget>[
                         Container(
@@ -109,26 +106,17 @@ class _UserState extends State<User> {
                               ]),
                               child: FadeInImage.assetNetwork(
                                 placeholder: 'lib/assets/image/v.png',
-                                image:
-                                    'http://ww1.sinaimg.cn/large/005O2C54gy1g6u7h0jzyhj308r08nmyq.jpg',
+                                image: 'http://ww1.sinaimg.cn/large/005O2C54gy1g6u7h0jzyhj308r08nmyq.jpg',
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                         ),
                         Container(
-                          child: Text('洞洞洞洞洞',
-                              style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 18.0,
-                                  height: 1.2)),
+                          child: Text('洞洞洞洞洞', style: TextStyle(color: Colors.black87, fontSize: 18.0, height: 1.2)),
                         ),
                         Container(
-                          child: Text('账号: jyh1994@qq.com',
-                              style: TextStyle(
-                                  color: Colors.black45,
-                                  fontSize: 12.0,
-                                  height: 1.5)),
+                          child: Text('账号: jyh1994@qq.com', style: TextStyle(color: Colors.black45, fontSize: 12.0, height: 1.5)),
                         ),
                       ],
                     ),
@@ -140,9 +128,7 @@ class _UserState extends State<User> {
           Expanded(
             flex: 1,
             child: Container(
-              decoration: BoxDecoration(
-                  border: Border(
-                      top: BorderSide(width: .2, color: Colors.black26))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(width: .2, color: Colors.black26))),
               child: ListView.builder(
                   padding: EdgeInsets.all(0),
                   itemCount: cellList.length,

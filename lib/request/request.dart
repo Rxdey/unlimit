@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:unlimit/util/util.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:unlimit/views/Login/login.dart';
 // import 'package:unlimit/api/api.dart';
 
 const HOST = 'http://45.76.203.52:9006';
@@ -42,14 +45,18 @@ class HttpRequest {
   static const String DELETE = 'delete';
 
   /// request method
-  static Future<Map> request(
-      Interface config, Map<String, dynamic> data) async {
+  static Future<Map> request(Interface config, Map<String, dynamic> data) async {
     data = data ?? {};
     String method = config.method ?? 'GET';
     String url = config.url ?? '';
     String baseUrl = config.baseUrl ?? '';
-    data['username'] = 'jyh1994@qq.com';
-    data['userId'] = '1';
+
+    String userName = await getStringItem('userName');
+    String userId = await getStringItem('userId');
+
+    if (userName != null && data['username'] == null) data['username'] = userName;
+    if (userId != null && data['userId'] == null) data['userId'] = userId;
+
     data.forEach((key, value) {
       if (url.indexOf(key) != -1) {
         url = url.replaceAll(':$key', value.toString());

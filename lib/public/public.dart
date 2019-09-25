@@ -42,9 +42,7 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     chapterList = json['chapterList'].cast<String>();
-    animaInfo = json['animaInfo'] != null
-        ? new AnimaInfo.fromJson(json['animaInfo'])
-        : null;
+    animaInfo = json['animaInfo'] != null ? new AnimaInfo.fromJson(json['animaInfo']) : null;
     // orderInfo = json['orderInfo'] != null ? json['orderInfo'] : null;
     // if (json['chapterDetail'] != null) {
     //   chapterDetail = new List<ChapterDetail>();
@@ -79,16 +77,7 @@ class AnimaInfo {
   String lastUpdata;
   String cover;
 
-  AnimaInfo(
-      {this.id,
-      this.name,
-      this.chapter,
-      this.status,
-      this.author,
-      this.desc,
-      this.type,
-      this.lastUpdata,
-      this.cover});
+  AnimaInfo({this.id, this.name, this.chapter, this.status, this.author, this.desc, this.type, this.lastUpdata, this.cover});
 
   AnimaInfo.fromJson(Map<String, dynamic> json) {
     id = json['id'];

@@ -5,14 +5,16 @@ import 'package:unlimit/model/model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:unlimit/views/Detail/detail.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:unlimit/views/Login/login.dart';
+import 'package:unlimit/util/util.dart';
+import 'package:flutter/cupertino.dart';
 
 class Subscription extends StatefulWidget {
   @override
   _SubscriptionState createState() => _SubscriptionState();
 }
 
-class _SubscriptionState extends State<Subscription>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _SubscriptionState extends State<Subscription> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController _controller;
   List subscriptionList = [];
   List historyList = [];
@@ -25,12 +27,17 @@ class _SubscriptionState extends State<Subscription>
   String loadingText = '暂无数据';
   int _tabIndex = 0;
   int pageSize = 30;
-  List<int> pageList = [1, 1];
-  List<bool> loadingList = [true, true];
+  List<int> pageList = [
+    1,
+    1
+  ];
+  List<bool> loadingList = [
+    true,
+    true
+  ];
   bool get wantKeepAlive => true;
 
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   void _onRefresh() async {
     // monitor network fetch
@@ -76,7 +83,19 @@ class _SubscriptionState extends State<Subscription>
     _getData(0);
   }
 
+  Future getCurrentUserInfo() async {
+    bool res = await getUserInfo();
+    if (!res) {
+      Navigator.pushAndRemoveUntil(context, CupertinoPageRoute(builder: (context) {
+        return LoginPage();
+      }), (route) => route == null);
+    }
+    return res;
+  }
+
   Future<void> _getData(type, [bool isloading = false]) async {
+    bool isLogin = await getCurrentUserInfo();
+    if (!isLogin) return;
     setState(() {
       loading = true;
       loadingText = '加载中...';
@@ -93,15 +112,12 @@ class _SubscriptionState extends State<Subscription>
       loadingText = '暂无数据';
     });
     if (res.state == 0) {
-      Fluttertoast.showToast(
-          msg: res.msg, textColor: Colors.red, gravity: ToastGravity.CENTER);
+      Fluttertoast.showToast(msg: res.msg, textColor: Colors.red, gravity: ToastGravity.CENTER);
       return;
     }
     setState(() {
       if (_tabIndex == 0) {
-        isloading
-            ? subscriptionList.addAll(res.data)
-            : subscriptionList = res.data;
+        isloading ? subscriptionList.addAll(res.data) : subscriptionList = res.data;
       } else {
         isloading ? historyList.addAll(res.data) : historyList = res.data;
       }
@@ -149,8 +165,7 @@ class _SubscriptionState extends State<Subscription>
               children: tabs
                   .map((item) => Stack(
                         children: <Widget>[
-                          booksWrap(
-                              item.key == '0' ? subscriptionList : historyList)
+                          booksWrap(item.key == '0' ? subscriptionList : historyList)
                         ],
                       ))
                   .toList(),
@@ -204,11 +219,7 @@ class _SubscriptionState extends State<Subscription>
                         spacing: 10.0,
                         runSpacing: 10.0,
                         alignment: WrapAlignment.start,
-                        children: currentList
-                            .asMap()
-                            .map((key, item) => MapEntry(key, bookCard(item)))
-                            .values
-                            .toList(),
+                        children: currentList.asMap().map((key, item) => MapEntry(key, bookCard(item))).values.toList(),
                       )
               ],
             )),
@@ -218,9 +229,7 @@ class _SubscriptionState extends State<Subscription>
 
   Widget bookCard(Map card) {
     final double width = 105.0;
-    String lastChaperName = card['last_chapter'] > -1
-        ? '看到' + card['last_chapter_name'].toString()
-        : '未看';
+    String lastChaperName = card['last_chapter'] > -1 ? '看到' + card['last_chapter_name'].toString() : '未看';
     return GestureDetector(
       onTap: () {
         Navigator.push(context, CupertinoPageRoute(builder: (context) {
