@@ -36,7 +36,7 @@ class _SwiperState extends State<Swiper> {
           onPageChanged: _onPageChanged,
           reverse: widget.reverse,
           itemCount: widget.imgList.length,
-          preloadPagesCount: 3,
+          preloadPagesCount: 6,
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {

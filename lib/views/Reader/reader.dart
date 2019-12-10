@@ -60,10 +60,6 @@ class _ReaderState extends State<Reader> {
     String pages = await getStringItem(widget.id.toString() + widget.chapterName);
     List temp = createImgList(dataList[cha]).list;
     int cdx = int.parse(pages ?? '0');
-    // if (cha - 1 >= 0) {
-    //   temp.insertAll(0, createImgList(dataList[cha - 1]).list);
-    //   cdx = (dataList[cha - 1]).list.length + cdx;
-    // }
     setState(() {
       lastPage = int.parse(pages ?? '0');
       currendIndex = cdx;
@@ -75,16 +71,6 @@ class _ReaderState extends State<Reader> {
   }
 
   handleOnChange(index) async {
-    // if (index == 0) {
-    //   setState(() {
-    //     currentChapter = dataList[currentChapterIndex - 1];
-    //     if (currentChapterIndex - 1 >= 0) {
-    //       lastList.insertAll( 0, createImgList(dataList[currentChapterIndex - 1]).list);
-    //     }
-    //     currentChapterIndex = currentChapterIndex - 1;
-    //   });
-    // }
-    // print('当前页>>>>>>>>>>>>>>>>>>>>' + lastList[index]['current'].toString());
     await setStringItem(widget.id.toString() + widget.chapterName, lastList[currendIndex]['current'].toString());
     setState(() {
       currendIndex = index;
